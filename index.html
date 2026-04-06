@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#f6f2ec">
+<link rel="manifest" href="manifest.json">
+<title>最小秩序</title>
+<style>
+:root{--bg:#f6f2ec;--c:#fffefa;--t:#322f2b;--s:#8a857e;--m:#b5b0a8;
+--l:#e8e3dc;--a:#c4684a;--ab:#fdf0ec;--g:#5a9e6f;--gb:#edf6f0;
+--bl:#7b9eb5;--bb:#eef3f7;--y:#d4a24e;--yb:#fdf6e8;
+--sh:0 2px 16px rgba(50,47,43,.06);--r:16px}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:var(--bg)}
+body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC",sans-serif;
+color:var(--t);line-height:1.6;max-width:520px;margin:0 auto;overflow-x:hidden}
+.wrap{padding:env(safe-area-inset-top,20px) 16px 110px;min-height:100%}
+
+.toast{position:fixed;top:calc(24px + env(safe-area-inset-top,20px));left:50%;
+transform:translateX(-50%) translateY(-80px);background:var(--t);color:#fff;
+padding:10px 24px;border-radius:14px;font-size:14px;font-weight:500;z-index:999;
+transition:transform .3s cubic-bezier(.4,0,.2,1);pointer-events:none}
+.toast.show{transform:translateX(-50%) translateY(0)}
+
+.greet{padding:16px 2px 4px}
+.greet h1{font-size:22px;font-weight:700;letter-spacing:-.5px}
+.greet .dt{font-size:14px;color:var(--s);margin-top:2px}
+.greet .wis{margin-top:10px;font-size:13px;color:var(--a);background:var(--ab);
+padding:10px 14px;border-radius:12px;line-height:1.5}
+
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0 18px}
+.st{border-radius:var(--r);padding:16px;color:#fff}
+.st1{background:linear-gradient(135deg,#c4684a,#d4915a)}
+.st2{background:linear-gradient(135deg,#5a9e6f,#6db87f)}
+.st .n{font-size:30px;font-weight:800;line-height:1}
+.st .lb{font-size:12px;opacity:.88;margin-top:4px}
+
+.cd{background:var(--c);border:1px solid var(--l);border-radius:var(--r);
+padding:18px;margin-bottom:14px;box-shadow:var(--sh)}
+.ct{display:flex;align-items:center;gap:8px;font-size:15px;font-weight:700;margin-bottom:4px}
+.cs{font-size:13px;color:var(--s);margin-bottom:12px;line-height:1.5}
+
+.ic{width:30px;height:30px;border-radius:10px;display:flex;align-items:center;
+justify-content:center;font-size:15px;flex-shrink:0}
+.ic1{background:var(--ab)}.ic2{background:var(--gb)}
+.ic3{background:var(--bb)}.ic4{background:var(--yb)}
+
+textarea,input[type=text]{width:100%;border:1.5px solid var(--l);border-radius:12px;
+padding:11px 13px;font-size:15px;font-family:inherit;background:#faf8f4;
+color:var(--t);outline:none;transition:border-color .2s;resize:none;line-height:1.5}
+textarea:focus,input[type=text]:focus{border-color:var(--a)}
+textarea{min-height:56px}
+
+.btn{border:none;border-radius:12px;padding:11px 18px;font-size:15px;
+font-weight:600;cursor:pointer;font-family:inherit;transition:all .15s}
+.btn:active{transform:scale(.97)}
+.ba{background:var(--a);color:#fff}
+.bo{background:transparent;color:var(--s);border:1.5px solid var(--l)}
+.bf{width:100%;margin-top:10px}
+
+.cb{width:100%;padding:15px;border-radius:14px;font-size:16px;font-weight:700;
+cursor:pointer;border:2.5px dashed var(--g);background:var(--gb);color:var(--g);
+transition:all .3s;font-family:inherit;margin-top:12px}
+.cb.done{border-style:solid;background:var(--g);color:#fff;
+box-shadow:0 4px 16px rgba(90,158,111,.25)}
+
+.inh{display:inline-block;font-size:12px;color:var(--bl);background:var(--bb);
+padding:3px 10px;border-radius:8px;margin-bottom:8px}
+
+.di{background:#faf8f4;border:1px solid var(--l);border-radius:12px;padding:13px;margin-top:10px}
+.dit{font-size:14px;line-height:1.5;margin-bottom:8px}
+.dtg{display:flex;gap:8px;flex-wrap:wrap}
+.dt{padding:4px 12px;border-radius:999px;font-size:12px;border:1.5px solid var(--l);
+background:#fff;color:var(--s);cursor:pointer}
+.dt.ac{border-color:var(--g);color:var(--g);background:var(--gb)}
+.dt.an{border-color:var(--m);color:var(--m);background:#f3f2ef}
+.dt.at{border-color:var(--bl);color:var(--bl)}
+.dn{font-size:12px;color:var(--m);margin-top:6px;font-style:italic}
+
+.ar{display:flex;gap:8px;align-items:flex-end}
+.ar textarea{flex:1;min-height:44px}
+.nf{margin-bottom:12px}
+.nf label{display:block;font-size:13px;color:var(--s);font-weight:600;margin-bottom:5px}
+
+.hi{background:var(--c);border:1px solid var(--l);border-radius:var(--r);
+padding:14px;margin-bottom:10px;box-shadow:var(--sh)}
+.hh{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.hd{font-size:14px;font-weight:700}
+.hs{font-size:12px;padding:3px 10px;border-radius:999px;font-weight:600}
+.hs.d{background:var(--gb);color:var(--g)}
+.hs.p{background:var(--yb);color:var(--y)}
+.hs.m{background:#f3f2ef;color:var(--m)}
+
+.rs{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:14px}
+.rv{background:#faf8f4;border-radius:12px;padding:12px;text-align:center}
+.rv .rn{font-size:24px;font-weight:800;color:var(--a)}
+.rv .rl{font-size:11px;color:var(--m);margin-top:2px}
+
+.pa{display:flex;justify-content:space-between;align-items:center;
+padding:10px 0;border-bottom:1px solid var(--l);font-size:14px}
+.pc{background:var(--ab);color:var(--a);padding:2px 10px;border-radius:8px;
+font-size:12px;font-weight:700}
+.pi{background:#faf8f4;border:1px solid var(--l);border-radius:12px;
+padding:13px;margin-top:10px}
+.pid{font-size:11px;color:var(--m);margin-bottom:4px}
+.page{display:none}.page.on{display:block}
+.emp{color:var(--m);font-size:14px;padding:20px 0;text-align:center}
+.guide{background:var(--bb);border:1px solid #d0dfe9;border-radius:var(--r);
+padding:16px;margin-bottom:14px;font-size:14px;line-height:1.7}
+.guide b{color:var(--bl)}
+.da{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}
+nav{position:fixed;bottom:0;left:0;right:0;
+background:rgba(255,254,250,.92);backdrop-filter:blur(16px);
+-webkit-backdrop-filter:blur(16px);border-top:1px solid var(--l);
+display:flex;justify-content:space-around;
+padding:8px 0 calc(8px + env(safe-area-inset-bottom,0px));
+z-index:90;max-width:520px;margin:0 auto}
+.nb{display:flex;flex-direction:column;align-items:center;gap:2px;
+font-size:10px;color:var(--m);cursor:pointer;padding:4px 12px;
+border:none;background:none;font-family:inherit}
+.nb svg{width:22px;height:22px;fill:none;stroke:currentColor;
+stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.nb.on{color:var(--a)}.nb.on svg{stroke:var(--a)}
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="greet"><h1 id="gH"></h1><div class="dt" id="gD"></div><div class="wis" id="gW"></div></div>
+<div class="stats">
+<div class="st st1"><div class="n" id="sS">0</div><div class="lb">天连续完成</div></div>
+<div class="st st2"><div class="n" id="sW">0/7</div><div class="lb">本周完成</div></div>
+</div>
+
+<div class="page on" id="p-today">
+  <div class="cd"><div class="ct"><div class="ic ic1">🎯</div>今日唯一题</div>
+  <div class="cs">今天只做这一件事。做完了，今天就没白过。</div>
+  <div id="inhBox"></div>
+  <textarea id="iT" placeholder="具体到坐下来就知道打开什么…"></textarea>
+  <button class="cb" id="bC">点击标记完成</button></div>
+
+  <div class="cd"><div class="ct"><div class="ic ic1">🔥</div>焦虑卸载</div>
+  <div class="cs">脑子里的担忧写出来。从黑雾变成清单，清单可以处理。</div>
+  <div class="ar"><textarea id="iD" placeholder="我现在具体在怕…"></textarea>
+  <button class="btn ba" id="bD">写下</button></div>
+  <div id="dL"></div></div>
+
+  <div class="cd"><div class="ct"><div class="ic ic3">🌙</div>睡前三行</div>
+  <div class="cs">给今天画个句号。带着明确的计划入睡。</div>
+  <div class="nf"><label>✅ 今天做到了什么</label><input type="text" id="n1" placeholder="哪怕很小"></div>
+  <div class="nf"><label>💡 一个收获或觉察</label><input type="text" id="n2" placeholder="今天意识到了…"></div>
+  <div class="nf"><label>📌 明天的唯一题</label><input type="text" id="n3" placeholder="明天要做的一件事"></div>
+  <button class="btn ba bf" id="bN">保存睡前记录</button></div>
+</div>
+
+<div class="page" id="p-hist"><div id="hB"></div></div>
+<div class="page" id="p-rev"><div id="rB"></div></div>
+
+<div class="page" id="p-pool"><div class="cd">
+  <div class="ct"><div class="ic ic2">💎</div>产品需求池</div>
+  <div class="cs">哪里不顺手，记下来。</div>
+  <div class="ar"><textarea id="iP" placeholder="场景→问题→我想要…"></textarea>
+  <button class="btn ba" id="bP">记录</button></div>
+  <div id="pL"></div>
+</div></div>
+
+<div class="page" id="p-set">
+  <div class="cd"><div class="ct"><div class="ic ic4">📊</div>焦虑模式识别</div>
+  <div class="cs">你反复在怕的事情。看见重复就能降低恐惧。</div>
+  <div id="ptB"></div></div>
+  <div class="guide"><b>💾 数据</b>：浏览器本地存储，不上传服务器。清缓存会丢，建议每周导出。</div>
+  <div class="cd"><div class="ct"><div class="ic ic4">📦</div>数据管理</div>
+  <div class="da">
+    <button class="btn bo" id="bEx">导出备份</button>
+    <button class="btn bo" id="bIm">导入数据</button>
+    <button class="btn bo" style="color:var(--a);border-color:var(--a)" id="bCl">清空数据</button>
+  </div><input type="file" id="fI" accept=".json" style="display:none"></div>
+</div>
+</div>
+
+<nav>
+<button class="nb on" data-p="today"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32l1.41 1.41M2 12h2m16 0h2M4.93 19.07l1.41-1.41m11.32-11.32l1.41-1.41"/></svg>今天</button>
+<button class="nb" data-p="hist"><svg viewBox="0 0 24 24"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="10"/></svg>历史</button>
+<button class="nb" data-p="rev"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 3v18"/></svg>回顾</button>
+<button class="nb" data-p="pool"><svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>需求池</button>
+<button class="nb" data-p="set"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>设置</button>
+</nav>
+<div class="toast" id="tt"></div>
+<script src="app.js"></script>
+</body>
+</html>
